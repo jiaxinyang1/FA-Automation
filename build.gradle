@@ -1,0 +1,33 @@
+plugins {
+    id 'net.neoforged.moddev' version '2.0.88'
+}
+
+version = mod_version
+group = mod_group
+
+base {
+    archivesName = mod_id
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+neoForge {
+    version = neo_version
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+dependencies {
+    // Compiled against the unmodified Forbidden Arcanus 2.6.1 and its Valhelsia Core dependency.
+    // Only public APIs of both are used.
+    compileOnly files('forbidden_arcanus-2.6.1-pure.jar')
+    compileOnly files('libs/valhelsia_core-neoforge-1.21.1-1.1.5.jar')
+}
