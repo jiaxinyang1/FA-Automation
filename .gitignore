@@ -16,6 +16,9 @@ run/
 runs/
 out/
 
+# Build-time dependency jars (not redistributed, see libs/README.md)
+libs/*.jar
+
 # Misc
 *.log
 *.tmp

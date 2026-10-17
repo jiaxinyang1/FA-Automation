@@ -1,48 +1,86 @@
 # Forbidden Arcanus Automation
 
-Forbidden & Arcanus（禁断奥术）的自动化辅助插件。不修改原 mod，全部通过公开 API 实现。
+[中文说明](README.zh-CN.md)
 
-## 功能
+An unofficial NeoForge addon for **Forbidden & Arcanus** (1.21.1) that adds item and fluid
+automation support plus an optional auto-ritual mode — without modifying the original mod.
+Everything is implemented against the mod's public APIs.
 
-- **管道/漏斗支持**（修复 1.21.1 移植后丢失的自动化能力）：
-  - 赫菲斯托斯锻造炉：四个精华输入槽按精华类型校验收料；主槽接受单个仪式原料；增强器槽保持 GUI 专属
-  - 基座：单格物品存取，物品变动会同步熔炉的仪式配料缓存
-  - Clibano 熔炉：复用原 mod 自带的 `ClibanoItemHandler`（顶面进原料、底面出产物、侧面进燃料/灵魂）
-- **仪式保护**：
-  - 仪式进行期间，基座的插入/抽取与主槽操作全部锁定（配料变动会导致仪式失败）
-  - 主槽只有仪式成功产出的结果可被管道抽走，等待开仪式的原料不会被抽走（快照比对实现）
-- **精华流体**：注册 `fa_automation:aureal / souls / blood / experience` 四种流体（1 mB = 1 精华）：
-  - 锻造炉暴露四罐（容量随熔炉等级），精华罐暴露单罐
-  - AE2 等流体自动化模组可直接存取
-  - aureal/blood/experience 贴图引用 FA 的液体材质；souls 为自制贴图
-- **自动模式**：手持锻工锤（任意材质）Shift+右键锻造炉切换（音效 + 动作栏提示，存档持久）。
-  满足条件（结构完整、有效仪式、精华充足）时自动启动仪式。仪式归属开启自动模式的玩家，
-  该玩家离线时仪式暂停等待。
+This project is not affiliated with Forbidden & Arcanus. Forbidden & Arcanus is created by
+stal111 and is All Rights Reserved; this addon merely calls its public APIs at runtime and
+requires the original mod to be installed separately.
 
-## 构建
+## Features
 
-需要 JDK 21。
+### Item automation (hoppers & item pipes)
+Restores the automation support that was lost when the mod was ported to the NeoForge
+capability system (see [stal111/Forbidden-Arcanus#466](https://github.com/stal111/Forbidden-Arcanus/issues/466)):
+
+- **Hephaestus Forge** — the four essence input slots accept only items that can be converted
+  into their matching essence; the main slot accepts a single ritual ingredient; enhancer
+  slots remain GUI-only.
+- **Pedestals** — single-slot item access. Pipe insertions keep the forge's ritual ingredient
+  cache in sync.
+- **Clibano** — reuses the mod's own `ClibanoItemHandler`: top face accepts smelting inputs,
+  bottom face ejects results, horizontal sides accept fuel and soul items.
+
+### Ritual safety
+- While a ritual is running, pedestal insertion/extraction and main slot access are locked —
+  changing ingredients mid-ritual would make it fail.
+- The main slot only allows pipes to extract a finished ritual result, never an ingredient
+  that is still waiting for the ritual to start (implemented via a result snapshot tracker,
+  so insert/extract pipe setups do not yo-yo the main ingredient).
+
+### Essence fluids
+Registers four non-placeable fluids — `fa_automation:aureal / souls / blood / experience` —
+with **1 mB = 1 essence unit**:
+
+- The forge exposes four tanks (capacity scales with forge tier); each essence utrem jar
+  exposes a single tank matching its essence type.
+- Works with any fluid-based automation (e.g. Applied Energistics 2 fluid storage/export).
+- Aureal/blood/experience textures reuse the liquid textures of the original mod;
+  the souls textures are shipped with this addon (the mod has none).
+
+### Auto mode
+Sneak-right-click the Hephaestus Forge with a Blacksmith Gavel (any tier) to toggle auto mode
+(sound + action bar feedback, persisted per world). While enabled, the forge automatically
+starts a ritual whenever one is valid (structure complete, ingredients present, enough
+essences). Rituals are attributed to the player who enabled auto mode; while that player is
+offline, auto-starting waits.
+
+## Building
+
+Requires JDK 21.
+
+1. Put two jars into `libs/` (not redistributed here for licensing reasons, see `libs/README.md`):
+   - `forbidden_arcanus-2.6.1.jar` — the unmodified Forbidden & Arcanus release jar
+   - `valhelsia_core-neoforge-1.21.1-1.1.5.jar` — Valhelsia Core (the mod's dependency)
+2. Run:
 
 ```
 ./gradlew build
 ```
 
-产物在 `build/libs/fa_automation-<version>.jar`。
+The addon jar is written to `build/libs/fa_automation-<version>.jar`.
 
-编译依赖已包含在仓库中：`forbidden_arcanus-2.6.1-pure.jar`（未修改的 FA 构建产物，仅用于编译期解析 API）
-与 `libs/valhelsia_core-neoforge-1.21.1-1.1.5.jar`。若仓库转为公开，建议移除 FA 构建产物并改为
-自行从源码构建。
+## Installation
 
-## 安装
+Put into your `mods` folder:
 
-`mods` 目录放入：
-
-1. Forbidden & Arcanus 2.6.1+（官方版即可）
-2. Valhelsia Core（FA 的前置）
+1. Forbidden & Arcanus 2.6.1+ (official release)
+2. Valhelsia Core (its dependency)
 3. `fa_automation-<version>.jar`
 
-## 已知边界
+## Known limitations
 
-- 自动模式需要开启者在线才能自动启动仪式（上游 `startRitual` 需要玩家实例）
-- 服务器重启后，已在主槽的旧产物需等下一场仪式完成才重新开放管道抽取（追踪快照不落盘）
-- 多数量仪式产物被管道部分抽取后，剩余部分只能从 GUI 取出
+- Auto-started rituals require the enabling player to be online (the mod's `startRitual`
+  requires a player instance).
+- After a server restart, a result that already sits in the main slot only becomes
+  pipe-extractable again after the next completed ritual (snapshots are not persisted).
+- If a multi-count ritual result is partially extracted by a pipe, the remainder can only be
+  taken out via the GUI.
+
+## License
+
+This repository's code is licensed under the [MIT License](LICENSE).
+It does not include or redistribute any assets or binaries of Forbidden & Arcanus.

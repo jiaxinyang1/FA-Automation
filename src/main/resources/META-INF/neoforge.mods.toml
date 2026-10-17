@@ -7,7 +7,7 @@ issueTrackerURL = "https://github.com/stal111/Forbidden-Arcanus/issues/466"
 modId = "fa_automation"
 version = "1.0.2"
 displayName = "Forbidden Arcanus Automation"
-authors = "marisa"
+authors = "jiaxinyang1"
 description = '''
 Adds item and fluid automation support to the Hephaestus Forge, pedestals, the Clibano and essence utrem jars,
 plus an optional auto-ritual mode toggled by sneak-right-clicking the forge with a Blacksmith Gavel.
