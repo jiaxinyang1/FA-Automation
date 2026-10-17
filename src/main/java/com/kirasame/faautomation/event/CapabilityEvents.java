@@ -32,7 +32,8 @@ import java.util.WeakHashMap;
  */
 public class CapabilityEvents {
 
-    private static final Map<HephaestusForgeBlockEntity, ForgeItemHandler> FORGE_ITEM_HANDLERS = new WeakHashMap<>();
+    private static final Map<HephaestusForgeBlockEntity, EnumMap<Direction, ForgeItemHandler>> FORGE_ITEM_HANDLERS = new WeakHashMap<>();
+    private static final Map<HephaestusForgeBlockEntity, ForgeItemHandler> FORGE_ITEM_HANDLERS_NO_SIDE = new WeakHashMap<>();
     private static final Map<HephaestusForgeBlockEntity, ForgeFluidHandler> FORGE_FLUID_HANDLERS = new WeakHashMap<>();
     private static final Map<PedestalBlockEntity, PedestalItemHandler> PEDESTAL_ITEM_HANDLERS = new WeakHashMap<>();
     private static final Map<EssenceUtremJarBlockEntity, UtremJarFluidHandler> JAR_FLUID_HANDLERS = new WeakHashMap<>();
@@ -40,10 +41,15 @@ public class CapabilityEvents {
 
     @SubscribeEvent
     public void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
+        // Top face feeds the main crafting slot, all other faces feed the essence input slots
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.HEPHAESTUS_FORGE.get(), (blockEntity, side) -> {
             RitualResultTracker.track(blockEntity);
 
-            return FORGE_ITEM_HANDLERS.computeIfAbsent(blockEntity, be -> new ForgeItemHandler(be, be.getItemStackHandler()));
+            if (side == null) {
+                return FORGE_ITEM_HANDLERS_NO_SIDE.computeIfAbsent(blockEntity, be -> new ForgeItemHandler(be, be.getItemStackHandler(), null));
+            }
+
+            return FORGE_ITEM_HANDLERS.computeIfAbsent(blockEntity, be -> new EnumMap<>(Direction.class)).computeIfAbsent(side, dir -> new ForgeItemHandler(blockEntity, blockEntity.getItemStackHandler(), dir));
         });
 
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.HEPHAESTUS_FORGE.get(), (blockEntity, side) ->

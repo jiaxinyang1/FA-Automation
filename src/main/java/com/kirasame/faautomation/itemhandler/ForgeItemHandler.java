@@ -5,10 +5,12 @@ import com.stal111.forbidden_arcanus.common.block.entity.forge.essence.EssenceTy
 import com.stal111.forbidden_arcanus.core.registry.FARegistries;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,9 +30,17 @@ public class ForgeItemHandler implements IItemHandler {
     private final HephaestusForgeBlockEntity blockEntity;
     private final IItemHandler itemHandler;
 
-    public ForgeItemHandler(HephaestusForgeBlockEntity blockEntity, IItemHandler itemHandler) {
+    @Nullable
+    private final Direction side;
+
+    /**
+     * @param side the face the interaction comes from: the top face feeds the main
+     *             crafting slot, all other faces (and no side) feed the essence input slots
+     */
+    public ForgeItemHandler(HephaestusForgeBlockEntity blockEntity, IItemHandler itemHandler, @Nullable Direction side) {
         this.blockEntity = blockEntity;
         this.itemHandler = itemHandler;
+        this.side = side;
     }
 
     public static boolean canInput(Level level, EssenceType type, ItemStack stack) {
@@ -56,6 +66,10 @@ public class ForgeItemHandler implements IItemHandler {
         }
 
         if (slot == HephaestusForgeBlockEntity.MAIN_SLOT) {
+            if (this.side != Direction.UP) {
+                return stack;
+            }
+
             if (this.blockEntity.getRitualManager().isRitualActive() || !this.itemHandler.getStackInSlot(slot).isEmpty()) {
                 return stack;
             }
@@ -70,7 +84,7 @@ public class ForgeItemHandler implements IItemHandler {
         EssenceType essenceType = ESSENCE_TYPE_FROM_SLOT_MAP.get(slot);
         Level level = this.blockEntity.getLevel();
 
-        if (essenceType == null || level == null || !canInput(level, essenceType, stack)) {
+        if (this.side == Direction.UP || essenceType == null || level == null || !canInput(level, essenceType, stack)) {
             return stack;
         }
 
@@ -103,12 +117,12 @@ public class ForgeItemHandler implements IItemHandler {
     @Override
     public boolean isItemValid(int slot, @NotNull ItemStack stack) {
         if (slot == HephaestusForgeBlockEntity.MAIN_SLOT) {
-            return true;
+            return this.side == Direction.UP;
         }
 
         EssenceType essenceType = ESSENCE_TYPE_FROM_SLOT_MAP.get(slot);
         Level level = this.blockEntity.getLevel();
 
-        return essenceType != null && level != null && canInput(level, essenceType, stack);
+        return this.side != Direction.UP && essenceType != null && level != null && canInput(level, essenceType, stack);
     }
 }
