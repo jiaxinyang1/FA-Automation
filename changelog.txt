@@ -1,3 +1,8 @@
+1.0.7
+- The essence input slots no longer allow pipe extraction. With a full essence storage, items buffered in the
+  slots would otherwise be cycled right back out by extraction pipes. Only ritual results in the main slot are
+  extractable now; buffered items can still be taken out via the GUI.
+
 1.0.6
 - Forge item input is now side-aware: the top face feeds the main crafting slot, all other faces feed the essence
   input slots, so ingredient and essence supply can be piped independently.

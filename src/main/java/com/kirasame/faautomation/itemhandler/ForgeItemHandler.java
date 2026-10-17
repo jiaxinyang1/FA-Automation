@@ -93,12 +93,14 @@ public class ForgeItemHandler implements IItemHandler {
 
     @Override
     public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
-        if (slot == HephaestusForgeBlockEntity.MAIN_SLOT) {
-            // Only the ritual result may be pulled out, never an ingredient that is waiting for the ritual to start
-            if (this.blockEntity.getRitualManager().isRitualActive() || !RitualResultTracker.isRitualResult(this.blockEntity)) {
-                return ItemStack.EMPTY;
-            }
-        } else if (!ESSENCE_TYPE_FROM_SLOT_MAP.containsKey(slot)) {
+        // Essence input slots are insert-only for pipes: with a full essence storage, buffered
+        // items must not be cycled back out by extraction pipes. They can still be taken via the GUI.
+        if (slot != HephaestusForgeBlockEntity.MAIN_SLOT) {
+            return ItemStack.EMPTY;
+        }
+
+        // Only the ritual result may be pulled out, never an ingredient that is waiting for the ritual to start
+        if (this.blockEntity.getRitualManager().isRitualActive() || !RitualResultTracker.isRitualResult(this.blockEntity)) {
             return ItemStack.EMPTY;
         }
 
