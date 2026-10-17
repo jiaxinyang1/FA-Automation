@@ -5,7 +5,7 @@ issueTrackerURL = "https://github.com/jiaxinyang1/FA-Automation/issues"
 
 [[mods]]
 modId = "fa_automation"
-version = "1.0.3"
+version = "1.0.4"
 displayName = "Forbidden Arcanus Automation"
 logoFile = "icon.png"
 authors = "jiaxinyang1"

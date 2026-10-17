@@ -2,9 +2,11 @@ package com.kirasame.faautomation.event;
 
 import com.kirasame.faautomation.automode.AutoModeData;
 import com.stal111.forbidden_arcanus.common.block.EssenceUtremJarBlock;
+import com.stal111.forbidden_arcanus.common.block.UtremJarBlock;
 import com.stal111.forbidden_arcanus.common.block.HephaestusForgeBlock;
 import com.stal111.forbidden_arcanus.common.block.entity.EssenceUtremJarBlockEntity;
 import com.stal111.forbidden_arcanus.common.block.entity.forge.essence.EssenceType;
+import com.stal111.forbidden_arcanus.core.init.ModBlocks;
 import com.stal111.forbidden_arcanus.core.init.ModDataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -47,11 +49,16 @@ public class InteractionEvents {
     }
 
     private boolean cycleJarType(PlayerInteractEvent.RightClickBlock event, Player player) {
-        if (!player.isSecondaryUseActive() || !event.getItemStack().isEmpty() || !(event.getLevel().getBlockState(event.getPos()).getBlock() instanceof EssenceUtremJarBlock)) {
+        if (!player.isSecondaryUseActive() || !event.getItemStack().isEmpty()) {
             return false;
         }
 
-        if (!(event.getLevel().getBlockEntity(event.getPos()) instanceof EssenceUtremJarBlockEntity jarEntity) || jarEntity.getAmount() != 0) {
+        if (!(event.getLevel().getBlockState(event.getPos()).getBlock() instanceof UtremJarBlock jarBlock)) {
+            return false;
+        }
+
+        // Plain jars have no storage; typed jars must be empty to be switched
+        if (jarBlock instanceof EssenceUtremJarBlock && (!(event.getLevel().getBlockEntity(event.getPos()) instanceof EssenceUtremJarBlockEntity jarEntity) || jarEntity.getAmount() != 0)) {
             return false;
         }
 
@@ -62,10 +69,21 @@ public class InteractionEvents {
 
         if (event.getLevel() instanceof ServerLevel serverLevel) {
             BlockState state = serverLevel.getBlockState(event.getPos());
-            EssenceType[] types = EssenceType.values();
-            EssenceType next = types[(state.getValue(EssenceUtremJarBlock.ESSENCE_TYPE).ordinal() + 1) % types.length];
+            EssenceType next;
 
-            serverLevel.setBlockAndUpdate(event.getPos(), state.setValue(EssenceUtremJarBlock.ESSENCE_TYPE, next));
+            if (state.getBlock() instanceof EssenceUtremJarBlock) {
+                EssenceType[] types = EssenceType.values();
+                next = types[(state.getValue(EssenceUtremJarBlock.ESSENCE_TYPE).ordinal() + 1) % types.length];
+
+                serverLevel.setBlockAndUpdate(event.getPos(), state.setValue(EssenceUtremJarBlock.ESSENCE_TYPE, next));
+            } else {
+                // A plain jar enters the cycle as an aureal essence jar
+                next = EssenceType.AUREAL;
+
+                serverLevel.setBlockAndUpdate(event.getPos(), ModBlocks.ESSENCE_UTREM_JAR.get().defaultBlockState()
+                        .setValue(UtremJarBlock.WATERLOGGED, state.getValue(UtremJarBlock.WATERLOGGED))
+                        .setValue(EssenceUtremJarBlock.ESSENCE_TYPE, next));
+            }
 
             serverLevel.playSound(null, event.getPos(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.6F, 1.0F);
             player.displayClientMessage(Component.translatable("message.fa_automation.jar_type_set", next.getComponent()), true);
