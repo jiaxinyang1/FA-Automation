@@ -1,3 +1,6 @@
+1.0.3
+- Added: sneak-right-click an empty essence utrem jar with an empty hand to cycle its essence type (aureal -> souls -> blood -> experience). Jars with essence inside cannot be switched.
+
 1.0.2
 Initial public release.
 

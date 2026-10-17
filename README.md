@@ -41,6 +41,11 @@ with **1 mB = 1 essence unit**:
 - Aureal/blood/experience textures reuse the liquid textures of the original mod;
   the souls textures are shipped with this addon (the mod has none).
 
+### Essence jar type switching
+Sneak-right-click an **empty** essence utrem jar with an **empty hand** to cycle its essence type
+(aureal -> souls -> blood -> experience, with sound + action bar feedback). Jars that still contain
+essence cannot be switched.
+
 ### Auto mode
 Sneak-right-click the Hephaestus Forge with a Blacksmith Gavel (any tier) to toggle auto mode
 (sound + action bar feedback, persisted per world). While enabled, the forge automatically
