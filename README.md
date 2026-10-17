@@ -41,17 +41,6 @@ with **1 mB = 1 essence unit**:
 - Aureal/blood/experience textures reuse the liquid textures of the original mod;
   the souls textures are shipped with this addon (the mod has none).
 
-### Essence jar auto-absorption
-Typed jars generate their essence on their own, like the forge does for blood:
-- **Blood** jars absorb `max health x 10` essence whenever a living entity dies within 4 blocks.
-- **Experience** jars attract nearby experience orbs and absorb `value x 10` essence.
-- **Souls** jars slowly extract 10 essence from soul sand / soul soil in a 5x5x5 area, turning it into soulless sand.
-
-### Essence jar type switching
-Sneak-right-click an **empty** essence utrem jar with an **empty hand** to cycle its essence type
-(aureal -> souls -> blood -> experience, with sound + action bar feedback). Jars that still contain
-essence cannot be switched.
-
 ### Auto mode
 Sneak-right-click the Hephaestus Forge with a Blacksmith Gavel (any tier) to toggle auto mode
 (sound + action bar feedback, persisted per world). While enabled, the forge automatically

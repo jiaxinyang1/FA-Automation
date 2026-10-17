@@ -4,7 +4,6 @@ import com.kirasame.faautomation.event.CapabilityEvents;
 import com.kirasame.faautomation.event.InteractionEvents;
 import com.kirasame.faautomation.event.ServerTickHandler;
 import com.kirasame.faautomation.fluid.ModFluids;
-import com.kirasame.faautomation.jar.JarAbsorptionHandler;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
@@ -23,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class FAAutomation {
 
     public static final String MOD_ID = "fa_automation";
-    public static final String VERSION = "1.0.5";
+    public static final String VERSION = "1.0.2";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     public FAAutomation(IEventBus modEventBus) {
@@ -34,6 +33,5 @@ public class FAAutomation {
 
         NeoForge.EVENT_BUS.register(new InteractionEvents());
         NeoForge.EVENT_BUS.register(new ServerTickHandler());
-        NeoForge.EVENT_BUS.register(new JarAbsorptionHandler());
     }
 }

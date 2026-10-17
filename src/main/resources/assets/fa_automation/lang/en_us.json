@@ -1,5 +1,4 @@
 {
   "block.fa_automation.auto_mode_enabled": "Auto Mode enabled",
-  "block.fa_automation.auto_mode_disabled": "Auto Mode disabled",
-  "message.fa_automation.jar_type_set": "Utrem Jar: %s"
+  "block.fa_automation.auto_mode_disabled": "Auto Mode disabled"
 }

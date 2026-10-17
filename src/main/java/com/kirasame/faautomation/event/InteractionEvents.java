@@ -1,12 +1,7 @@
 package com.kirasame.faautomation.event;
 
 import com.kirasame.faautomation.automode.AutoModeData;
-import com.stal111.forbidden_arcanus.common.block.EssenceUtremJarBlock;
-import com.stal111.forbidden_arcanus.common.block.UtremJarBlock;
 import com.stal111.forbidden_arcanus.common.block.HephaestusForgeBlock;
-import com.stal111.forbidden_arcanus.common.block.entity.EssenceUtremJarBlockEntity;
-import com.stal111.forbidden_arcanus.common.block.entity.forge.essence.EssenceType;
-import com.stal111.forbidden_arcanus.core.init.ModBlocks;
 import com.stal111.forbidden_arcanus.core.init.ModDataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -16,17 +11,13 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 /**
- * Two interactions:
- * - Sneak-right-clicking the Hephaestus Forge with a Blacksmith Gavel (any item
- *   with the ritual starter component) toggles auto mode for that forge.
- * - Sneak-right-clicking an empty essence utrem jar with an empty hand cycles
- *   the essence type it stores. Jars with essence inside cannot be switched.
+ * Sneak-right-clicking the Hephaestus Forge with a Blacksmith Gavel (any item
+ * with the ritual starter component) toggles auto mode for that forge.
  *
  * @author marisa
  * @since 2026-10-17
@@ -37,66 +28,15 @@ public class InteractionEvents {
     public void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         Player player = event.getEntity();
 
-        if (event.getHand() != InteractionHand.MAIN_HAND) {
-            return;
-        }
-
-        if (this.cycleJarType(event, player)) {
-            return;
-        }
-
-        this.toggleAutoMode(event, player);
-    }
-
-    private boolean cycleJarType(PlayerInteractEvent.RightClickBlock event, Player player) {
-        if (!player.isSecondaryUseActive() || !event.getItemStack().isEmpty()) {
-            return false;
-        }
-
-        if (!(event.getLevel().getBlockState(event.getPos()).getBlock() instanceof UtremJarBlock jarBlock)) {
-            return false;
-        }
-
-        // Plain jars have no storage; typed jars must be empty to be switched
-        if (jarBlock instanceof EssenceUtremJarBlock && (!(event.getLevel().getBlockEntity(event.getPos()) instanceof EssenceUtremJarBlockEntity jarEntity) || jarEntity.getAmount() != 0)) {
-            return false;
-        }
-
-        event.setUseBlock(TriState.FALSE);
-        event.setUseItem(TriState.FALSE);
-        event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide()));
-        event.setCanceled(true);
-
-        if (event.getLevel() instanceof ServerLevel serverLevel) {
-            BlockState state = serverLevel.getBlockState(event.getPos());
-            EssenceType next;
-
-            if (state.getBlock() instanceof EssenceUtremJarBlock) {
-                EssenceType[] types = EssenceType.values();
-                next = types[(state.getValue(EssenceUtremJarBlock.ESSENCE_TYPE).ordinal() + 1) % types.length];
-
-                serverLevel.setBlockAndUpdate(event.getPos(), state.setValue(EssenceUtremJarBlock.ESSENCE_TYPE, next));
-            } else {
-                // A plain jar enters the cycle as an aureal essence jar
-                next = EssenceType.AUREAL;
-
-                serverLevel.setBlockAndUpdate(event.getPos(), ModBlocks.ESSENCE_UTREM_JAR.get().defaultBlockState()
-                        .setValue(UtremJarBlock.WATERLOGGED, state.getValue(UtremJarBlock.WATERLOGGED))
-                        .setValue(EssenceUtremJarBlock.ESSENCE_TYPE, next));
-            }
-
-            serverLevel.playSound(null, event.getPos(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.6F, 1.0F);
-            player.displayClientMessage(Component.translatable("message.fa_automation.jar_type_set", next.getComponent()), true);
-        }
-
-        return true;
-    }
-
-    private void toggleAutoMode(PlayerInteractEvent.RightClickBlock event, Player player) {
         boolean hasStarter = event.getItemStack().get(ModDataComponents.RITUAL_STARTER.get()) != null;
         boolean isForge = event.getLevel().getBlockState(event.getPos()).getBlock() instanceof HephaestusForgeBlock;
 
-        if (!hasStarter || !isForge || !player.isSecondaryUseActive()) {
+        if (!hasStarter && !isForge) {
+            return;
+        }
+
+
+        if (event.getHand() != InteractionHand.MAIN_HAND || !player.isSecondaryUseActive() || !hasStarter || !isForge) {
             return;
         }
 
