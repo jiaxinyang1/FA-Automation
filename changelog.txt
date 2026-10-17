@@ -1,0 +1,10 @@
+1.0.2
+Initial public release.
+
+Features:
+- Item automation (hoppers/pipes) for the Hephaestus Forge, pedestals and the Clibano, restoring support lost in the 1.21.1 NeoForge port
+- Ritual-safe rules: pedestals and the main slot are locked while a ritual runs; only finished ritual results can be extracted from the main slot
+- Four essence fluids (aureal, souls, blood, experience; 1 mB = 1 essence) exposed as tanks on the forge and essence utrem jars, compatible with fluid automation such as Applied Energistics 2
+- Auto mode: sneak-right-click the forge with a Blacksmith Gavel to toggle; the forge then starts valid rituals automatically
+
+Requires Forbidden & Arcanus 2.6.1+ and Valhelsia Core for Minecraft 1.21.1 (NeoForge).
